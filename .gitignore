@@ -1,0 +1,34 @@
+# Node.js
+node_modules/
+dist/
+.yarn/
+.pnp.*
+.cache/
+.nyc_output/
+coverage/
+
+# Secrets
+.env
+.env.* 
+secretkeys.json
+
+# TypeScript
+*.tsbuildinfo
+
+# IDEs
+.vscode/
+.idea/
+*.sw?
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/

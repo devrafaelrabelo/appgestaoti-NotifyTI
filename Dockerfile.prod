@@ -1,0 +1,50 @@
+# ====== Stage 1: build ======
+FROM node:20-bullseye-slim AS builder
+WORKDIR /app
+
+# Instala ferramentas necessárias
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  git python3 make g++ ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Clona o repositório oficial do WPPConnect Server
+ARG WPP_TAG=main
+RUN git clone --depth 1 --branch ${WPP_TAG} https://github.com/wppconnect-team/wppconnect-server.git .
+
+# Sobrescreve o arquivo de configuração com o seu
+COPY wppconnect/config.ts ./src/config.ts
+
+# Instala dependências e compila o projeto
+ENV YARN_IGNORE_ENGINE=true
+RUN corepack enable && corepack prepare yarn@stable --activate
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+# ====== Stage 2: runtime ======
+FROM node:20-bullseye-slim
+WORKDIR /app
+
+# Instala dependências de execução (Chromium etc)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  chromium ca-certificates dumb-init fonts-freefont-ttf \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV CHROME_PATH=/usr/bin/chromium
+ENV NODE_ENV=production
+
+# Copia somente os artefatos de produção
+COPY --from=builder /app/package.json /app/yarn.lock ./
+COPY --from=builder /app/dist ./dist
+
+# Instala apenas dependências de produção
+ENV YARN_IGNORE_ENGINE=true
+RUN corepack enable && corepack prepare yarn@stable --activate \
+  && yarn workspaces focus --production || yarn install --production
+
+# Porta padrão do WPPConnect
+EXPOSE 21465
+VOLUME ["/app/userDataDir"]
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/index.js"]

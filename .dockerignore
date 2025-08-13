@@ -1,0 +1,18 @@
+# Evita enviar arquivos desnecessários para o build
+node_modules
+dist
+.yarn
+.pnp.*
+.vscode
+.idea
+.git
+.gitignore
+Dockerfile
+Dockerfile.dev
+README.md
+*.log
+*.tsbuildinfo
+*.sw?
+.env
+.env.*
+secretkeys.json
