@@ -1,11 +1,11 @@
-name: Build and Push WPPConnect Docker Image
+name: Build and Push WPPConnect Image
 
 on:
   push:
     branches: ["main"]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v5
         with:
-          context: ./wppconnect
+          context: .
           file: ./wppconnect/Dockerfile.prod
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/wppconnect-server:latest
+          tags: ghcr.io/devrafaelrabelo/wppconnect-server:latest
